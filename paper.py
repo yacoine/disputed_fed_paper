@@ -24,62 +24,74 @@ def get_mae(min_split, train_X, val_X, train_y, val_y):
 
 	return mae
 
-
+#Data frame is created from a csv file that contains the frequency of usage
+#of the 70 most used words in the federalist papers
+#First column is either 1 = Hamilton, 2=Madison, 3=Disputed
 path='federalist_papers_data.csv'
 paper_data=np.genfromtxt(path,delimiter=',')
 
+#70 most used words,
 txt_path='federalist_papers_wordlist.txt'
 word_txt=np.genfromtxt(txt_path, dtype='str')
 
-
+#creationg of empty data frame
 df=pd.DataFrame()
 
+#name column
 df['Name']=paper_data[:,0]
 
+#word and frequency column
 for i in range(0,len(word_txt)):
 	df[word_txt[i]]= paper_data[:,i+1]
 
+#data frame for disputed papers 
 df_test=df.loc[(df['Name'] >2.0)]
 df_disputed=df_test[df_test.columns.difference(['Name'])]
 
+#data frame for the undisputed fed papers
 df = df.loc[(df['Name']<= 2)]
-
 y_train=df.Name
 X_train=df[df.columns.difference(['Name'])]
 
-
+#Splitting data to train and test the model
 train_X, val_X, train_y, val_y = train_test_split(X_train, y_train, random_state=1)
 
+#Use a linear regression model
 lm=linear_model.LinearRegression()
-model =lm.fit(train_X,train_y)
-predictions= lm.predict(val_X)
-
-result_pred=[]
-for i in range(len(predictions)):
-	
-	if(predictions[i]<=1.5):
-		result_pred.append(1)
-	else:
-		result_pred.append(2)
-	print(predictions[i],':',result_pred[i], ':',int(val_y.iloc[i]) )
-
-print(mean_absolute_error(result_pred,val_y))
-#print(model.score(val_X, val_y))
-
-print(X_train)
-print(y_train)
-
-lm1=linear_model.LinearRegression()
-model =lm1.fit(X_train,y_train)
+model =lm.fit(X_train,y_train)
 disputed_prediction= lm.predict(df_disputed)
-print(disputed_prediction)
 
+#Change all predict values <=1.5 to Hamilton and >1.5 to Madison
 disputed_result=[]
+
 for i in range(len(disputed_prediction)):
 	
 	if(disputed_prediction[i]<=1.5):
 		disputed_result.append("Hamilton")
 	else:
 		disputed_result.append("Madison")
-print(disputed_result)
 
+print('Predicted undisputed federalist papers with linear regression:')
+print(disputed_result)
+# MAE for LR= 0.515
+#Predicted 9/12 disputed federalist papers to be Madison
+
+
+#Train and use a random forest regressor
+model= RandomForestRegressor(n_estimators=10,min_samples_split=10,random_state=1)
+model.fit(X_train,y_train)
+predict_val=model.predict(df_disputed)
+
+#Change all predict values <=1.5 to Hamilton and >1.5 to Madison
+disputed_result_rfr=[]
+
+for i in range(len(disputed_prediction)):
+	
+	if(predict_val[i]<=1.5):
+		disputed_result_rfr.append("Hamilton")
+	else:
+		disputed_result_rfr.append("Madison")
+
+print('Predicted undisputed federalist papers with random forest regressor:')
+print(disputed_result_rfr)
+#MAE for RFR= 0.088
