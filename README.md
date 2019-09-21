@@ -37,6 +37,10 @@ After using linear regression (LR) and random forest regression (RFR), it seems 
 The linear regression after being trained, gave a result of 9 papers written by Madison and 3 by Hamilton.
 ![Column features from .csv file](images/LR_result.png)
 
+The RFR after being trained with the entire data set, resulted in predicting all the disputed papers as written by Madison.
+![Column features from .csv file](images/RFR_result.png)
+
+
 ## Papers that use different forms of machine learning to solve the disputed federalist paper problem.
 
 Bosch, Smith, and Fung attributed all of the 12 disputed papers to Madison. This agrees with the opinions of other scholars, although there are arguments that some of the essays attributed to Madison may have been collaborative efforts.
